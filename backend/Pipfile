@@ -1,0 +1,28 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "4.1.7"
+uvicorn = "*"
+pydantic = "*"
+celery = "*"
+dj-database-url = "*"
+beautifulsoup4 = "*"
+requests = "*"
+redis = "*"
+robotexclusionrulesparser = "*"
+slowapi = "*"
+fastapi = { extras = ["all"], version = "*" }
+
+[dev-packages]
+pytest = "*"
+httpx = "*"
+pytest-django = "*"
+requests-mock = { extras = ["fixture"], version = "*" }
+coverage = "*"
+pytest-mock = "*"
+
+[requires]
+python_version = "3.8"

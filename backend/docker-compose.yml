@@ -1,0 +1,81 @@
+version: "3.8"
+
+x-backend-config: &backend-config
+  env_file:
+    - .env
+  build: .
+  environment:
+    - DATABASE_URL=postgres://optifimo:optifimo@db/${DATABASE_NAME:-optifimo}
+    - PYTHONUNBUFFERED=1
+    - CLOUDAMQP_URL=amqp://admin:mypass@rabbit:5672//
+
+x-worker-config: &worker-config
+  <<: *backend-config
+  depends_on:
+    - rabbit
+    - db
+  volumes:
+    - ./:/srv
+
+volumes:
+  pg-data:
+
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: db
+    environment:
+      - POSTGRES_DB=optifimo
+      - POSTGRES_USER=optifimo
+      - POSTGRES_PASSWORD=optifimo
+    shm_size: 512mb
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  rabbit:
+    container_name: rabbit
+    hostname: rabbit
+    image: rabbitmq:3.7.7-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+
+  redis:
+    container_name: redis
+    image: redis:5.0.4-alpine
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    expose:
+      - 6379
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+
+  backend:
+    <<: *backend-config
+    container_name: backend
+    expose:
+      - ${PORT}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./:/srv
+    ports:
+      - "8000:${PORT}"
+    command: uvicorn optifino.asgi -t 90 -w 3 -b 0.0.0.0:${PORT}
+
+  worker:
+    <<: *worker-config
+    container_name: worker
+    depends_on:
+      - rabbit
+      - db
+    command: celery -A optifino worker -Q normal -c 3 --loglevel=info
