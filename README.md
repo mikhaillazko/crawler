@@ -1,0 +1,9 @@
+# crawler
+Tech stack
+- Python
+  -   FastAPI
+  -   Django
+  -   Celery
+- JavaScript
+  -   React
+  -   MUI
