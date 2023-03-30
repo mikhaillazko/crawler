@@ -15,6 +15,7 @@ redis = "*"
 robotexclusionrulesparser = "*"
 slowapi = "*"
 fastapi = { extras = ["all"], version = "*" }
+psycopg2 = "*"
 
 [dev-packages]
 pytest = "*"
