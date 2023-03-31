@@ -67,6 +67,7 @@ services:
     depends_on:
       - db_optifino
       - redis_optifino
+      - rabbit_optifino
     volumes:
       - ./:/srv
     ports:
